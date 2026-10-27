@@ -18,7 +18,8 @@ shorui-flow/
 ├── functions/                    # Cloudflare Pages Functions (サーバーレスAPI)
 │   └── api/
 │       ├── documents.js          # D1クラウド保存・取得・5件上限チェック
-│       ├── webhook.js            # Stripe Webhook決済完了連携(Pro昇格)
+│       ├── user-status.js        # D1ユーザー最新プラン照会・即時同期API
+│       ├── webhook.js            # Stripe Webhook決済完了連携(Web Crypto署名検証 & Pro昇格)
 │       └── portal.js             # Stripe Customer Portal連携(解約・カード変更)
 ├── schema.sql                    # Cloudflare D1データベース定義
 ├── notion-template/              # 【プランB】副産物Notionテンプレート
@@ -93,6 +94,9 @@ python -m http.server 8787
    npx wrangler d1 execute shorui-db --file=./schema.sql
    ```
    - Cloudflare Pagesの設定「Settings > Functions > D1 Database Bindings」で、変数名を `DB` としてバインドします。
-3. **Stripe連携**
-   - StripeダッシュボードでPayment Linkを作成し、モーダルのURLに設定。
+3. **Stripe連携 (Proプラン自動昇格 & 契約管理)**
+   - StripeダッシュボードでPayment Linkを作成し、モーダルのURLに設定（アプリ側で遷移時に自動的に `?client_reference_id=${userId}` が付与されます）。
+   - **Webhook設定**: Stripeダッシュボードの開発者 > Webhook にて、エンドポイント `https://<YOUR_DOMAIN>/api/webhook` を登録。
+     - 送信イベント: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`
+     - 取得した署名シークレット（`whsec_...`）をCloudflare Pagesの環境変数 `STRIPE_WEBHOOK_SECRET` に登録（未設定時もテスト用自動更新フォールバックが動作します）。
    - Pagesの環境変数に `STRIPE_PORTAL_URL` を設定すると、Customer Portalによる解約・カード変更が自動化されます。

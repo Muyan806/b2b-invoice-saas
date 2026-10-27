@@ -3,8 +3,8 @@
 
 -- ユーザーテーブル (Proプラン認証・契約管理)
 CREATE TABLE IF NOT EXISTS users (
-    id TEXT PRIMARY KEY,                       -- ユーザーUUIDまたはStripe Customer ID
-    email TEXT UNIQUE NOT NULL,
+    id TEXT PRIMARY KEY,                       -- ユーザーUUIDまたはStripe Customer ID (client_reference_id)
+    email TEXT,
     plan TEXT NOT NULL DEFAULT 'free',         -- 'free' | 'pro'
     stripe_customer_id TEXT,
     stripe_subscription_id TEXT,

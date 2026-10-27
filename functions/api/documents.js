@@ -20,6 +20,8 @@ export async function onRequestGet(context) {
             });
         }
 
+        await ensureTables(env.DB);
+
         // ユーザーのプラン確認
         const user = await env.DB.prepare(
             'SELECT * FROM users WHERE id = ?'
@@ -78,6 +80,8 @@ export async function onRequestPost(context) {
                 headers: { 'Content-Type': 'application/json' }
             });
         }
+
+        await ensureTables(env.DB);
 
         // ユーザー取得または初期登録
         let user = await env.DB.prepare(
@@ -180,5 +184,40 @@ export async function onRequestDelete(context) {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });
+    }
+}
+
+async function ensureTables(db) {
+    try {
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT,
+                plan TEXT NOT NULL DEFAULT 'free',
+                stripe_customer_id TEXT,
+                stripe_subscription_id TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS documents (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                doc_type TEXT NOT NULL,
+                doc_number TEXT NOT NULL,
+                title TEXT NOT NULL,
+                client_name TEXT NOT NULL,
+                issue_date TEXT NOT NULL,
+                due_date TEXT,
+                total_amount INTEGER NOT NULL DEFAULT 0,
+                tax_amount INTEGER NOT NULL DEFAULT 0,
+                currency TEXT NOT NULL DEFAULT 'JPY',
+                data_json TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+        `);
+    } catch (e) {
+        // すでに存在している場合等は無視
     }
 }

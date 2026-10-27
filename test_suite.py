@@ -117,9 +117,17 @@ def test_shorui_flow():
     print("  -> 5件フリーミアム制限およびProアップセルモーダル発火確認完了")
 
     # 3.6 テーマ管理ロジック
+    # 3.6 テーマ管理ロジック
     if "initTheme" not in js_content or "shorui_theme" not in js_content:
         errors.append("JS missing initTheme / shorui_theme persistence")
     print("  -> 外観テーマ切り替え (Light / Dark) 永続化ロジック確認完了")
+
+    # 3.7 クライアント識別子 (userId) & Stripe client_reference_id 連動検証
+    if "shorui_user_id" not in js_content or "client_reference_id" not in js_content:
+        errors.append("JS missing userId generation or client_reference_id Stripe parameter binding")
+    if "/api/user-status" not in js_content or "checkUserStatusAndHandleReturn" not in js_content:
+        errors.append("JS missing user-status API synchronization or return handler")
+    print("  -> クライアント識別子 (userId) 生成、Stripe client_reference_id 動的付与、即時同期ロジック確認完了")
 
     # 4. プランB (Notionテンプレート) 成果物検証
     print("[4] プランB Notionテンプレート成果物検証...")
@@ -149,12 +157,21 @@ def test_shorui_flow():
         os.path.join(base_dir, "schema.sql"),
         os.path.join(base_dir, "functions", "api", "documents.js"),
         os.path.join(base_dir, "functions", "api", "webhook.js"),
-        os.path.join(base_dir, "functions", "api", "portal.js")
+        os.path.join(base_dir, "functions", "api", "portal.js"),
+        os.path.join(base_dir, "functions", "api", "user-status.js")
     ]
     for ff in functions_files:
         if not os.path.exists(ff):
             errors.append(f"Functions/DB file missing: {ff}")
-    print("  -> Cloudflare D1スキーマおよびFunctions API確認完了")
+    
+    # webhook.js の堅牢性検証 (Web Crypto API & ensureTables)
+    with open(os.path.join(base_dir, "functions", "api", "webhook.js"), "r", encoding="utf-8") as wf:
+        webhook_content = wf.read()
+    if "client_reference_id" not in webhook_content or "ensureTables" not in webhook_content:
+        errors.append("webhook.js missing client_reference_id processing or ensureTables auto-migration")
+    if "STRIPE_WEBHOOK_SECRET" not in webhook_content or "crypto.subtle" not in webhook_content:
+        errors.append("webhook.js missing Web Crypto API or secret check")
+    print("  -> Cloudflare D1スキーマおよびFunctions API (user-status, webhook, documents, portal) 確認完了")
 
     # 結果集計
     print("\n=== テスト結果 ===")

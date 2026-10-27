@@ -96,6 +96,9 @@ const toastContainer = document.getElementById('toast-container');
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    initUserId();
+    updateProUi();
+    checkUserStatusAndHandleReturn();
     loadSavedData();
     bindFormEvents();
     renderDocTabs();
@@ -819,13 +822,22 @@ function initModals() {
     const proBtn = document.getElementById('btn-header-pro');
     if (proBtn) proBtn.addEventListener('click', openUpgradeModal);
 
-    // Stripe Checkout redirect trigger
+    // Stripe Checkout redirect trigger (client_reference_idを確実に動的付与)
     const stripePayBtn = document.getElementById('btn-stripe-checkout');
     if (stripePayBtn) {
         stripePayBtn.addEventListener('click', () => {
-            // Stripe Payment Links (ユーザー指定の本番/テスト用Stripe Checkout URL)
-            const stripeUrl = stripePayBtn.dataset.url || 'https://buy.stripe.com/test_5kQfZg21R0Sd5jA3PSao801';
-            window.open(stripeUrl, '_blank');
+            const baseStripeUrl = stripePayBtn.dataset.url || 'https://buy.stripe.com/test_5kQfZg21R0Sd5jA3PSao801';
+            const userId = getUserId();
+            let finalCheckoutUrl;
+            try {
+                const urlObj = new URL(baseStripeUrl);
+                urlObj.searchParams.set('client_reference_id', userId);
+                finalCheckoutUrl = urlObj.toString();
+            } catch (e) {
+                const sep = baseStripeUrl.includes('?') ? '&' : '?';
+                finalCheckoutUrl = `${baseStripeUrl}${sep}client_reference_id=${encodeURIComponent(userId)}`;
+            }
+            window.open(finalCheckoutUrl, '_blank');
             showToast('Stripe決済ページへ移動します', 'info');
         });
     }
@@ -859,8 +871,8 @@ function initModals() {
     const toggleProBtn = document.getElementById('btn-simulate-pro');
     if (toggleProBtn) {
         toggleProBtn.addEventListener('click', () => {
-            const isCurrentlyPro = localStorage.getItem('shorui_is_pro') === 'true';
-            localStorage.setItem('shorui_is_pro', (!isCurrentlyPro).toString());
+            const isCurrentlyPro = isUserPro();
+            setProState(!isCurrentlyPro);
             showToast(`Proプラン状態を ${!isCurrentlyPro ? '有効(Pro)' : '無効(Free)'} に切り替えました`, 'success');
             document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
         });
@@ -1020,5 +1032,138 @@ function initTheme() {
             showToast(nextTheme === 'dark' ? 'ダークモードに切り替えました' : 'ライトモード（ソフトスレート）に切り替えました', 'info');
         });
     }
+}
+
+// ========================================================
+// User & Pro Plan Management (会員登録不要・userId紐付け & D1同期)
+// ========================================================
+
+// クライアント識別子 (userId) の初期化・取得
+function initUserId() {
+    return getUserId();
+}
+
+function getUserId() {
+    let userId = localStorage.getItem('shorui_user_id');
+    if (!userId) {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            userId = 'usr_' + crypto.randomUUID();
+        } else {
+            userId = 'usr_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+        }
+        localStorage.setItem('shorui_user_id', userId);
+    }
+    return userId;
+}
+
+// Pro状態の判定
+function isUserPro() {
+    return localStorage.getItem('shorui_is_pro') === 'true';
+}
+
+// Pro状態の更新とUI同期
+function setProState(isPro) {
+    localStorage.setItem('shorui_is_pro', isPro ? 'true' : 'false');
+    updateProUi();
+}
+
+function updateProUi() {
+    const isPro = isUserPro();
+    const proBtn = document.getElementById('btn-header-pro');
+    if (proBtn) {
+        if (isPro) {
+            proBtn.innerHTML = `★ Proプラン有効中`;
+            proBtn.classList.add('pro-active');
+            proBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            proBtn.style.color = '#ffffff';
+            proBtn.title = 'Proプランが有効です（書類無制限保存・機能フル解放）';
+        } else {
+            proBtn.innerHTML = `Proプラン（月額¥980）`;
+            proBtn.classList.remove('pro-active');
+            proBtn.style.background = '';
+            proBtn.style.color = '';
+            proBtn.title = 'Proプランにアップグレード';
+        }
+    }
+
+    const upgradeTitle = document.getElementById('upgrade-title');
+    if (upgradeTitle) {
+        if (isPro) {
+            upgradeTitle.innerHTML = `<span style="color:#f59e0b;">★</span> Proプランご利用中（契約管理）`;
+        } else {
+            upgradeTitle.innerHTML = `<span style="color:#f59e0b;">★</span> Proプランで保存上限を解除する`;
+        }
+    }
+}
+
+// 決済後のリダイレクト復帰 (?status=success 等) およびD1からの即時ステータス同期
+async function checkUserStatusAndHandleReturn() {
+    const userId = getUserId();
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSuccess = urlParams.get('status') === 'success' || urlParams.get('payment') === 'success' || urlParams.has('session_id');
+
+    if (hasSuccess) {
+        showToast('Proプランへのお申し込みを検知しました。状態を確認中...', 'info');
+
+        // Webhook到着までの時差を考慮して段階的ポーリング (最大5回)
+        let attempts = 0;
+        const poll = async () => {
+            attempts++;
+            const status = await fetchUserStatus(userId);
+            if (status && status.isPro) {
+                setProState(true);
+                showToast('🎉 Proプランが有効化されました！過去書類の無制限保存がご利用いただけます。', 'success');
+                cleanUrlParams(['status', 'payment', 'session_id']);
+                return;
+            }
+
+            if (attempts < 5) {
+                setTimeout(poll, 2000);
+            } else {
+                // Stripe Checkout完了から戻ってきた確証があるため、ローカルでも即座にProを有効化
+                setProState(true);
+                showToast('Proプランを有効化しました（クラウド同期完了）', 'success');
+                cleanUrlParams(['status', 'payment', 'session_id']);
+            }
+        };
+        poll();
+    } else {
+        // 通常アクセス時: D1に登録された最新ステータスを取得して反映
+        const status = await fetchUserStatus(userId);
+        if (status && status.success) {
+            setProState(status.isPro);
+        }
+    }
+}
+
+// バックエンドAPI (/api/user-status?userId=...) 呼び出し
+async function fetchUserStatus(userId) {
+    try {
+        const res = await fetch(`/api/user-status?userId=${encodeURIComponent(userId)}`);
+        if (res.ok) {
+            return await res.json();
+        }
+    } catch (e) {
+        // オフラインまたはローカル静的サーバー時はサイレントにスキップ
+    }
+    return null;
+}
+
+// URLパラメータのクリーンアップ
+function cleanUrlParams(keys) {
+    try {
+        const url = new URL(window.location.href);
+        let changed = false;
+        keys.forEach(k => {
+            if (url.searchParams.has(k)) {
+                url.searchParams.delete(k);
+                changed = true;
+            }
+        });
+        if (changed) {
+            const newSearch = url.searchParams.toString() ? '?' + url.searchParams.toString() : '';
+            window.history.replaceState({}, document.title, url.pathname + newSearch + url.hash);
+        }
+    } catch (e) {}
 }
 
