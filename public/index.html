@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShoruiFlow (書類フロー) - B2B業務書類作成＆ワンクリック変換マイクロSaaS</title>
+    <meta name="description" content="会員登録不要・完全無料でインボイス制度対応の見積書・発注書・納品書・請求書を即時作成＆ワンクリック相互変換。A4印刷プレビュー、URLハッシュ共有対応。">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234338ca'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>">
+</head>
+<body>
+    <!-- App Header: 視覚的優先度を整えた上部ナビゲーション -->
+    <header class="app-header">
+        <a href="#" class="brand" id="brand-logo" title="ShoruiFlow トップへ">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">ShoruiFlow</span>
+                <span class="brand-subtitle">B2B業務書類作成＆ワンクリック変換</span>
+            </div>
+        </a>
+
+        <!-- Document Mode Selector Tabs (44pxタッチターゲット規格) -->
+        <nav class="doc-tabs-bar" aria-label="書類種別選択">
+            <button class="doc-tab active" data-doc-type="estimate" id="tab-estimate" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                御見積書
+            </button>
+            <button class="doc-tab" data-doc-type="order" id="tab-order" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                御注文書
+            </button>
+            <button class="doc-tab" data-doc-type="delivery" id="tab-delivery" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                納品書
+            </button>
+            <button class="doc-tab" data-doc-type="invoice" id="tab-invoice" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                御請求書
+            </button>
+        </nav>
+
+        <!-- Header Actions: アクション指向マイクロコピー（44pxタッチターゲット） -->
+        <div class="header-actions">
+            <button class="btn btn-ghost" id="btn-new-doc" type="button" title="入力内容をクリアして新規作成">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                新規作成
+            </button>
+            <button class="btn btn-secondary" id="btn-saved-list" type="button" title="保存済み書類の一覧を表示">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                書類一覧
+            </button>
+            <button class="btn btn-secondary" id="btn-cloud-save" type="button" title="クラウドに保存（無料枠: 最大5件）">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                クラウド保存
+            </button>
+            <button class="btn btn-secondary" id="btn-share-hash" type="button" title="サーバーに保存せずURLハッシュで安全に共有リンクを発行">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                共有リンク
+            </button>
+            <button class="btn btn-ghost" id="btn-theme-toggle" type="button" title="外観テーマ切り替え（ライト / ダーク）" aria-label="テーマ切り替え">
+                <span id="theme-icon" aria-hidden="true">🌙</span>
+                <span id="theme-label">ダーク</span>
+            </button>
+            <button class="btn btn-pro-badge" id="btn-header-pro" type="button">
+                Proプラン（月額¥980）
+            </button>
+        </div>
+    </header>
+
+    <!-- Notice Banner: 控えめな誘導 -->
+    <div class="notice-banner">
+        <div class="notice-content">
+            <span class="notice-badge">Notion連携</span>
+            <span>案件管理・請求漏れアラート・外注費集計をNotionで一元化する公式テンプレート</span>
+        </div>
+        <button class="btn btn-ghost btn-sm notice-link" id="btn-notion-bundle" type="button">
+            テンプレートの設計書と数式を確認する →
+        </button>
+    </div>
+
+    <!-- Main Workspace Container -->
+    <main class="app-container">
+        <!-- LEFT: Control Panel (シングルカラム・認知摩擦ゼロ設計) -->
+        <section class="panel" aria-label="書類情報入力パネル">
+            <div class="panel-header">
+                <h1 class="panel-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-action-focus)" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    書類情報入力
+                </h1>
+                <span id="auto-save-indicator" style="font-size: var(--text-xs); color: var(--color-state-success); font-weight: 500;">
+                    ● 自動保存完了
+                </span>
+            </div>
+
+            <div class="panel-body">
+                <!-- 1. 基本メタ情報 -->
+                <div class="form-section">
+                    <div class="section-label">1. 書類基本情報</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="form-doc-number">書類番号 <span class="form-label-required">※必須</span></label>
+                        <input type="text" id="form-doc-number" class="input" placeholder="EST-2026-001" required>
+                        <div class="field-error" id="error-doc-number">書類番号を入力してください</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-issue-date">発行日 <span class="form-label-required">※必須</span></label>
+                            <input type="date" id="form-issue-date" class="input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-due-date">支払期日 / 有効期限</label>
+                            <input type="date" id="form-due-date" class="input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-rounding">端数処理方法</label>
+                        <select id="form-rounding" class="select">
+                            <option value="floor">切り捨て (インボイス制度標準)</option>
+                            <option value="round">四捨五入</option>
+                            <option value="ceil">切り上げ</option>
+                        </select>
+                        <div class="field-helper">1つの書類につき、税率区分ごとに1回計算されます。</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-title">件名</label>
+                        <input type="text" id="form-title" class="input" placeholder="例: Webシステム開発および保守業務の件">
+                    </div>
+                </div>
+
+                <!-- 2. 取引先情報 (シングルカラム中心) -->
+                <div class="form-section">
+                    <div class="section-label">2. 取引先（請求先）情報</div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-client-name">取引先名 (会社名・屋号) <span class="form-label-required">※必須</span></label>
+                        <input type="text" id="form-client-name" class="input" placeholder="株式会社〇〇" autocomplete="organization" required>
+                        <div class="field-error" id="error-client-name">取引先名を入力してください</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-client-honorific">敬称</label>
+                            <select id="form-client-honorific" class="select">
+                                <option value="御中">御中</option>
+                                <option value="様">様</option>
+                                <option value="殿">殿</option>
+                                <option value="">(なし)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-client-contact">ご担当者名</label>
+                            <input type="text" id="form-client-contact" class="input" placeholder="山田 太郎 様" autocomplete="name">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-client-postal">郵便番号</label>
+                        <input type="text" id="form-client-postal" class="input" placeholder="〒150-0000" autocomplete="postal-code">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-client-address">所在地（住所）</label>
+                        <input type="text" id="form-client-address" class="input" placeholder="東京都渋谷区道玄坂..." autocomplete="street-address">
+                    </div>
+                </div>
+
+                <!-- 3. 発行者（自社）情報 -->
+                <div class="form-section">
+                    <div class="section-label">3. 発行者（自社）情報</div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-issuer-name">自社名 / 屋号 <span class="form-label-required">※必須</span></label>
+                        <input type="text" id="form-issuer-name" class="input" autocomplete="organization" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-issuer-postal">郵便番号</label>
+                            <input type="text" id="form-issuer-postal" class="input" autocomplete="postal-code">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-issuer-tel">電話番号</label>
+                            <input type="tel" id="form-issuer-tel" class="input" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-issuer-address">所在地（住所）</label>
+                        <input type="text" id="form-issuer-address" class="input" autocomplete="street-address">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-issuer-email">メールアドレス</label>
+                        <input type="email" id="form-issuer-email" class="input" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-invoice-number">適格請求書発行事業者 登録番号 (T+13桁)</label>
+                        <input type="text" id="form-invoice-number" class="input" placeholder="T1234567890123" maxlength="14">
+                        <div class="field-helper">インボイス要件：Tから始まる13桁の半角数字</div>
+                    </div>
+
+                    <!-- ロゴ & 角印画像 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">自社ロゴ画像</label>
+                            <div class="upload-box">
+                                <label class="btn btn-secondary btn-sm" for="form-logo-file" style="cursor: pointer;">
+                                    ファイル選択
+                                </label>
+                                <input type="file" id="form-logo-file" class="file-input-hidden" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">角印（社判）画像</label>
+                            <div class="upload-box">
+                                <label class="btn btn-secondary btn-sm" for="form-seal-file" style="cursor: pointer;">
+                                    ファイル選択
+                                </label>
+                                <input type="file" id="form-seal-file" class="file-input-hidden" accept="image/*">
+                                <label style="font-size: var(--text-xs); display:flex; align-items:center; gap:4px; margin-left:auto; color: var(--color-text-sub);">
+                                    <input type="checkbox" id="form-show-seal" checked> 押印表示
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. 振込先口座情報 (請求書用) -->
+                <div class="form-section">
+                    <div class="section-label">4. お振込先口座（請求書モード用）</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-bank-name">金融機関名</label>
+                            <input type="text" id="form-bank-name" class="input" placeholder="三井住友銀行">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-branch-name">支店名・口座種別</label>
+                            <input type="text" id="form-branch-name" class="input" placeholder="青山支店 (普通)">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-account-number">口座番号</label>
+                            <input type="text" id="form-account-number" class="input" placeholder="1234567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-account-holder">口座名義 (カナ)</label>
+                            <input type="text" id="form-account-holder" class="input" placeholder="カ）ネクストテクノロジー">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. 品目明細 -->
+                <div class="form-section">
+                    <div class="section-label">
+                        <span>5. 明細品目・単価</span>
+                        <button class="btn btn-secondary btn-sm" id="add-item-btn" type="button">
+                            + 品目を追加
+                        </button>
+                    </div>
+                    <div id="items-list">
+                        <!-- Dynamic Item Rows -->
+                    </div>
+                </div>
+
+                <!-- 6. 備考欄 -->
+                <div class="form-section">
+                    <div class="section-label">6. 備考・特記事項</div>
+                    <div class="form-group">
+                        <textarea id="form-notes" class="textarea" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT: A4 Paper Preview Area (活版印刷の端正さと格調) -->
+        <section class="preview-container" aria-label="書類プレビュー">
+            <!-- Preview Controls Bar -->
+            <div class="preview-toolbar">
+                <div class="transform-bar">
+                    <span style="font-weight: 600; color: var(--color-text-main);">連動変換：</span>
+                    <div id="quick-convert-container" style="display: flex; gap: var(--space-2);">
+                        <!-- Dynamic One-Click Convert Buttons -->
+                    </div>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn btn-primary" id="btn-print" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        A4書類をPDF印刷・保存
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workspace A4 Paper Sheet -->
+            <div class="paper-workspace">
+                <div class="a4-sheet" id="printable-a4-sheet">
+                    <!-- Top Section: Header & Meta -->
+                    <div>
+                        <div class="doc-header">
+                            <div>
+                                <h2 class="doc-title-main" id="paper-doc-title">御見積書</h2>
+                            </div>
+                            <div class="doc-meta">
+                                <div class="doc-meta-item">No. <strong id="paper-doc-number">EST-2026-001</strong></div>
+                                <div class="doc-meta-item"><span id="paper-issue-label">見積日：</span><strong id="paper-issue-date">2026年10月27日</strong></div>
+                                <div class="doc-meta-item"><span id="paper-due-label">有効期限：</span><strong id="paper-due-date">2026年11月26日</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Parties Grid (Client & Issuer) -->
+                        <div class="parties-grid">
+                            <!-- Client -->
+                            <div class="client-section">
+                                <div>
+                                    <div class="client-name-box">
+                                        <span class="client-name" id="paper-client-name">株式会社オープンイノベーション</span>
+                                        <span class="client-honorific" id="paper-client-honorific">御中</span>
+                                    </div>
+                                    <div style="font-size: 8.5pt; color: var(--color-paper-muted);">
+                                        <div id="paper-client-postal">〒150-0043</div>
+                                        <div id="paper-client-address">東京都渋谷区道玄坂1-2-3 渋谷マークシティ 14F</div>
+                                        <div id="paper-client-contact" style="margin-top: 2px; font-weight: 500; color: var(--color-paper-text);">ご担当：佐藤 健一 様</div>
+                                    </div>
+                                </div>
+                                <div class="subject-line" id="paper-subject">
+                                    件名：Webシステム開発および運用支援の件
+                                </div>
+                            </div>
+
+                            <!-- Issuer -->
+                            <div class="issuer-section">
+                                <img id="paper-issuer-logo" class="issuer-logo" style="display:none;" alt="自社ロゴ">
+                                <div class="issuer-name" id="paper-issuer-name">合同会社ネクストテクノロジー</div>
+                                <div id="paper-issuer-postal">〒107-0062</div>
+                                <div id="paper-issuer-address">東京都港区南青山2-5-17</div>
+                                <div id="paper-issuer-tel">TEL: 03-6800-1234</div>
+                                <div id="paper-issuer-email">Email: contact@next-technology.jp</div>
+                                
+                                <div class="invoice-badge-box" id="paper-invoice-box">
+                                    登録番号: <strong id="paper-invoice-number">T1234567890123</strong>
+                                </div>
+
+                                <!-- 角印（社判）スタンプ -->
+                                <div class="issuer-seal-container" id="paper-seal-container">
+                                    <img id="paper-issuer-seal" class="issuer-seal-img" alt="社印">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grand Total Banner -->
+                        <div class="grand-total-banner">
+                            <span class="grand-total-label">合計金額（税込）</span>
+                            <span class="grand-total-val" id="paper-grand-total">¥825,000</span>
+                        </div>
+
+                        <!-- Items Table -->
+                        <table class="items-table" id="paper-items-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-idx">#</th>
+                                    <th class="col-desc">品名・明細概要</th>
+                                    <th class="col-qty">数量</th>
+                                    <th class="col-unit">単位</th>
+                                    <th class="col-price">単価</th>
+                                    <th class="col-tax">税率</th>
+                                    <th class="col-amt">金額</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paper-items-tbody">
+                                <!-- Dynamic Items -->
+                            </tbody>
+                        </table>
+
+                        <!-- Tax Breakdown & Summary Box -->
+                        <div class="summary-grid">
+                            <!-- Left: Invoice Tax Breakdown -->
+                            <div>
+                                <table class="tax-breakdown-table">
+                                    <thead>
+                                        <tr>
+                                            <th>税率区分</th>
+                                            <th class="text-right">税抜金額</th>
+                                            <th class="text-right">消費税額</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>10% 対象 (標準税率)</td>
+                                            <td class="text-right" id="paper-tax10-target">¥750,000</td>
+                                            <td class="text-right" id="paper-tax10-amount">¥75,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>8% 対象 (軽減税率)</td>
+                                            <td class="text-right" id="paper-tax8-target">¥0</td>
+                                            <td class="text-right" id="paper-tax8-amount">¥0</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Right: Total Summary -->
+                            <div>
+                                <table class="calc-summary-table">
+                                    <tr>
+                                        <td class="calc-label">小計（税抜）：</td>
+                                        <td class="calc-val" id="paper-subtotal-val">¥750,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="calc-label">消費税合計：</td>
+                                        <td class="calc-val" id="paper-tax-val">¥75,000</td>
+                                    </tr>
+                                    <tr class="calc-total">
+                                        <td class="calc-label" style="color:var(--color-paper-text); font-weight:700;">合計金額（税込）：</td>
+                                        <td class="calc-val" id="paper-bottom-grand-total">¥825,000</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Section: Bank, Notes, Minimal Viral Footer -->
+                    <div class="doc-footer-area">
+                        <!-- Bank Info for Invoices -->
+                        <div class="bank-info-box" id="paper-bank-box" style="display: none;">
+                            <div class="bank-info-title">お振込口座</div>
+                            <div class="bank-info-grid" id="paper-bank-detail">
+                                <span class="bank-info-item"><strong>金融機関:</strong> 三井住友銀行 青山支店 (普通)</span>
+                                <span class="bank-info-item"><strong>口座番号:</strong> 1234567</span>
+                                <span class="bank-info-item"><strong>口座名義:</strong> 合同会社ネクストテクノロジー</span>
+                            </div>
+                        </div>
+
+                        <!-- Notes / Remarks -->
+                        <div class="doc-notes-box" id="paper-notes-box">
+                            <div class="doc-notes-title">【備考・特記事項】</div>
+                            <div id="paper-notes" class="doc-notes-content"></div>
+                        </div>
+
+                        <!-- Minimal Viral Link -->
+                        <div class="viral-footer">
+                            作成ツール: <a href="#" target="_blank">ShoruiFlow</a> — 会員登録不要・インボイス対応 無料業務書類作成ツール
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- App Footer: 法務・特商法・規約・Stripe契約管理 (Stripe本番審査完全対応) -->
+    <footer class="app-footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <span class="footer-brand-name">ShoruiFlow</span>
+                    <span class="footer-brand-desc">— インボイス制度対応・B2B業務書類作成＆ワンクリック変換マイクロSaaS</span>
+                </div>
+                <nav class="footer-links" aria-label="フッターリンク">
+                    <button class="footer-link-btn" id="btn-footer-tokusho" type="button">特定商取引法に基づく表記</button>
+                    <span style="color: var(--color-border);" aria-hidden="true">|</span>
+                    <button class="footer-link-btn" id="btn-footer-terms" type="button">利用規約</button>
+                    <span style="color: var(--color-border);" aria-hidden="true">|</span>
+                    <button class="footer-link-btn" id="btn-footer-privacy" type="button">プライバシーポリシー</button>
+                    <span style="color: var(--color-border);" aria-hidden="true">|</span>
+                    <a class="footer-link-btn" id="btn-footer-portal" href="https://billing.stripe.com/p/login/test_28E14mbCr9oJh2i5Y0ao800" target="_blank" rel="noopener noreferrer" title="Stripe Customer Portal（別ウィンドウで開きます）">
+                        <span>契約管理・解約</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    </a>
+                </nav>
+            </div>
+            <div class="footer-bottom">
+                <div>© 2026 ShoruiFlow. All rights reserved.</div>
+                <div>安全な決済処理は <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" style="color: var(--color-text-sub); text-decoration: underline;">Stripe</a> により保護されています。</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal 1: Pro Plan Upgrade & Stripe Checkout (透明性と安心感) -->
+    <div class="modal-overlay" id="upgrade-modal" role="dialog" aria-modal="true" aria-labelledby="upgrade-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" id="upgrade-title">
+                    <span style="color:#f59e0b;">★</span> Proプランで保存上限を解除する
+                </h3>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: var(--text-sm); color: var(--color-text-sub); line-height: 1.6;">
+                    無料プランでは最大5件までクラウド保存できます。Proプランへアップグレードすると、過去書類を無制限に保存でき、自社ロゴ・角印画像の永続保持や複数事業所の切り替え管理が可能になります。
+                </p>
+
+                <ul class="pro-feature-list">
+                    <li class="pro-feature-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>過去書類の無制限保存</strong>（6件目以降もすべて安全にクラウド保存）</span>
+                    </li>
+                    <li class="pro-feature-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>自社ロゴ・角印画像の永続クラウド保持</strong></span>
+                    </li>
+                    <li class="pro-feature-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>複数事業所・複数振込先口座の切り替え管理</strong></span>
+                    </li>
+                    <li class="pro-feature-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span><strong>フッター透かしの非表示＆優先サポート</strong></span>
+                    </li>
+                </ul>
+
+                <div class="price-plans-grid">
+                    <div class="price-box selected">
+                        <div style="font-size: var(--text-xs); color: #818cf8; font-weight: 600;">月額プラン</div>
+                        <div class="price-num">¥980 <span style="font-size: var(--text-xs); font-weight: normal;">/月</span></div>
+                        <div class="price-term">いつでも解約可能</div>
+                    </div>
+                    <div class="price-box">
+                        <div style="font-size: var(--text-xs); color: var(--color-state-success); font-weight: 600;">年額プラン (2ヶ月分お得)</div>
+                        <div class="price-num">¥5,000 <span style="font-size: var(--text-xs); font-weight: normal;">/年</span></div>
+                        <div class="price-term">実質 ¥416 /月</div>
+                    </div>
+                </div>
+
+                <!-- クリックトリガー（安心感・確信性を担保） -->
+                <div class="click-trigger-note">
+                    🔒 お支払いはStripeにより256bit SSLで暗号化され安全に処理されます。クレジットカード情報は本サービス側に保存されません。
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                    <button class="btn btn-primary" id="btn-stripe-checkout" type="button" data-url="https://buy.stripe.com/test_5kQfZg21R0Sd5jA3PSao801" style="width: 100%; min-height: 48px;">
+                        StripeでProプランに申し込む（¥980/月）
+                    </button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); color: var(--color-text-sub); margin-top: 2px;">
+                        <a href="https://billing.stripe.com/p/login/test_28E14mbCr9oJh2i5Y0ao800" target="_blank" rel="noopener noreferrer" style="color: var(--color-action-accent); text-decoration: underline;">ご契約内容の確認・カード変更・ご解約はこちら</a>
+                        <button id="btn-simulate-pro" class="btn btn-ghost btn-sm" type="button" style="font-size: var(--text-xs); color: #64748b;" title="動作検証用">Pro状態切替(テスト用)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Saved Documents List (3大要素Empty State準拠) -->
+    <div class="modal-overlay" id="saved-docs-modal" role="dialog" aria-modal="true" aria-labelledby="saved-docs-title">
+        <div class="modal-card" style="max-width: 620px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="saved-docs-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    保存した書類一覧
+                </h3>
+                <span id="saved-docs-count" style="font-size: var(--text-xs); color: var(--color-text-sub); font-weight: 500;"></span>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                <div id="saved-docs-list">
+                    <!-- Dynamic Saved Items or 3-Element Empty State -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm modal-close-trigger" type="button">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Notion Template Cross-sell Bundle -->
+    <div class="modal-overlay" id="notion-bundle-modal" role="dialog" aria-modal="true" aria-labelledby="notion-bundle-title">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="notion-bundle-title">
+                    <span style="color:#06b6d4;">✦</span> Notion B2B業務管理テンプレート（公式パッケージ）
+                </h3>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: var(--text-sm); color: var(--color-text-sub); line-height: 1.6;">
+                    ShoruiFlowで作成した見積書・請求書データをそのままNotionで一元管理できます。在庫・維持費ゼロの買い切り型（¥1,980）公式テンプレートです。
+                </p>
+                <div style="background: var(--color-surface-sunken); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--text-xs);">
+                    <div>📂 <strong>4大統合データベース:</strong> 案件・クライアントDB / 見積・請求ステータスDB / 外注費・経費DB / SNS投稿スケジュールDB</div>
+                    <div>⚡ <strong>Formula 2.0 数式ロジック:</strong> 請求書未発行アラート、利益自動集計、納期カウントダウン</div>
+                    <div>📊 <strong>即戦力ダミーCSV同梱:</strong> インポートするだけですぐに実運用を開始可能</div>
+                </div>
+                <div style="display: flex; gap: var(--space-2); margin-top: var(--space-2);">
+                    <a href="https://booth.pm" target="_blank" class="btn btn-primary" style="flex: 1; text-align: center;">BOOTHでテンプレートを入手 (¥1,980)</a>
+                    <a href="https://gumroad.com" target="_blank" class="btn btn-secondary" style="flex: 1; text-align: center;">Gumroadで購入 ($15)</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: 特定商取引法に基づく表記 (Stripe本番審査完全対応) -->
+    <div class="modal-overlay" id="modal-tokusho" role="dialog" aria-modal="true" aria-labelledby="tokusho-title">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="tokusho-title">特定商取引法に基づく表記</h3>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body legal-content-scroll">
+                <table class="tokusho-table">
+                    <tbody>
+                        <tr>
+                            <th>サービス名</th>
+                            <td>ShoruiFlow (書類フロー)</td>
+                        </tr>
+                        <tr>
+                            <th>販売事業者 / 屋号</th>
+                            <td>ShoruiFlow 運営事務局（合同会社ネクストテクノロジー）</td>
+                        </tr>
+                        <tr>
+                            <th>運営統括責任者</th>
+                            <td>佐藤 健一</td>
+                        </tr>
+                        <tr>
+                            <th>所在地</th>
+                            <td>請求があった場合には遅滞なく開示いたします</td>
+                        </tr>
+                        <tr>
+                            <th>電話番号</th>
+                            <td>請求があった場合には遅滞なく開示いたします</td>
+                        </tr>
+                        <tr>
+                            <th>連絡先メールアドレス</th>
+                            <td><a href="mailto:support@shoruiflow.example.com" style="color: var(--color-action-accent); text-decoration: underline;">support@shoruiflow.example.com</a></td>
+                        </tr>
+                        <tr>
+                            <th>販売価格</th>
+                            <td>
+                                <div><strong>Proプラン（月額サブスクリプション）:</strong> 980円（税込）/ 月</div>
+                                <div style="margin-top: 4px;"><strong>Proプラン（年額サブスクリプション）:</strong> 5,000円（税込）/ 年</div>
+                                <div style="margin-top: 4px;"><strong>Notion業務管理テンプレート（買い切り）:</strong> 1,980円（税込）</div>
+                                <div style="font-size: var(--text-xs); color: var(--color-text-sub); margin-top: 4px;">※各販売ページまたはアップセル画面に表示された金額に準じます。</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>商品代金以外の必要料金</th>
+                            <td>インターネット接続料金、パケット通信料等の通信環境はお客様のご負担となります。</td>
+                        </tr>
+                        <tr>
+                            <th>代金の支払時期と方法</th>
+                            <td>
+                                <div><strong>支払方法:</strong> クレジットカード決済（Stripe）</div>
+                                <div style="font-size: var(--text-xs); color: var(--color-text-sub); margin-top: 2px;">（Visa / Mastercard / American Express / JCB 等）</div>
+                                <div style="margin-top: 4px;"><strong>支払時期:</strong> 初回お申し込み時に即時決済。以降、各契約更新サイクル（月次または年次）ごとに自動更新・自動決済が行われます。</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>役務の提供時期</th>
+                            <td>クレジットカード決済完了後、直ちにPro機能およびクラウドアカウントをご利用いただけます。</td>
+                        </tr>
+                        <tr>
+                            <th>解約条件・キャンセル・返品</th>
+                            <td>
+                                <div><strong>解約方法:</strong> 次回更新日の前日までに、サービス内フッターまたは設定画面の「契約管理・解約（Stripe Customer Portal）」リンクより、いつでもお客様ご自身で解約手続きを行っていただけます。</div>
+                                <div style="margin-top: 4px;"><strong>解約の効力:</strong> 解約手続き後も、現在の契約期間満了日まではPro機能を引き続きご利用いただけます。契約満了日をもって自動更新が停止し、フリープランへ移行します。</div>
+                                <div style="margin-top: 4px;"><strong>返品・返金:</strong> デジタルコンテンツおよびオンラインサービスの性質上、決済完了後の返金・キャンセル・日割り計算による返金には対応いたしかねますのでご了承ください。</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>動作環境</th>
+                            <td>Google Chrome, Apple Safari, Mozilla Firefox, Microsoft Edge（いずれも最新版推奨）。A4印刷機能は各ブラウザ標準の印刷ダイアログを使用します。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm modal-close-trigger" type="button">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: 利用規約 -->
+    <div class="modal-overlay" id="modal-terms" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="terms-title">利用規約</h3>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body legal-content-scroll">
+                <div class="legal-section-title">第1条（総則・適用）</div>
+                <p>本利用規約（以下「本規約」）は、ShoruiFlow（以下「当サービス」）が提供する書類作成・データ変換およびクラウド保存機能の一切の利用条件を定めるものです。利用者は、本サービスの利用を開始した時点で本規約に同意したものとみなします。</p>
+
+                <div class="legal-section-title">第2条（サービス内容と利用資格）</div>
+                <p>1. 当サービスは、登録不要で利用できるフリープラン、および追加機能を付与するProプラン（有料サブスクリプション）を提供します。<br>
+                2. 利用者は自己の責任において書類データの作成・管理・保存を行うものとします。</p>
+
+                <div class="legal-section-title">第3条（有料プランおよび決済）</div>
+                <p>1. 有料プランの利用料金および支払方法は、当サービスが別途定める通りとし、Stripe, Inc.が提供する決済システムを通じて処理されます。<br>
+                2. 有料プランは更新日までに解約手続きを行わない限り、同一条件にて自動更新されます。<br>
+                3. 既にお支払いいただいた利用料金の返金には応じかねます。</p>
+
+                <div class="legal-section-title">第4条（禁止事項）</div>
+                <p>利用者は、当サービスの利用にあたり、法令違反行為、不正アクセス、第三者へのなりすまし、当サービスのサーバーに過度な負荷をかける行為を行ってはなりません。</p>
+
+                <div class="legal-section-title">第5条（免責事項）</div>
+                <p>1. 当サービスは、作成された書類の法的効力、税法適合性（インボイス制度等の適法性）についていかなる保証も行いません。税務判断については税理士等の専門家にご相談ください。<br>
+                2. システム保守、通信障害、天災地変等によるサービスの一時中断に伴い生じた損害について、当サービスは一切の責任を負いません。</p>
+
+                <div class="legal-section-title">第6条（規約の変更および管轄裁判所）</div>
+                <p>当サービスは、本規約を随時変更できるものとします。本規約に関する紛争については、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm modal-close-trigger" type="button">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: プライバシーポリシー -->
+    <div class="modal-overlay" id="modal-privacy" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+        <div class="modal-card" style="max-width: 680px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="privacy-title">プライバシーポリシー</h3>
+                <button class="btn btn-ghost btn-sm modal-close-trigger" type="button" aria-label="閉じる">✕</button>
+            </div>
+            <div class="modal-body legal-content-scroll">
+                <div class="legal-section-title">1. 個人情報の収集と管理</div>
+                <p>当サービスは、お問い合わせ時や有料プラン契約時にご提供いただくメールアドレス等の情報を適切に管理します。フリープランでブラウザに入力された書類データ（取引先名、金額、口座情報等）は、お客様の端末（ローカルストレージ）またはURLハッシュでのみ保持され、サーバー側に収集されることはありません。</p>
+
+                <div class="legal-section-title">2. 決済情報の取扱い</div>
+                <p>有料プランのお支払いにかかるクレジットカード番号、有効期限、セキュリティコード等の機微な決済情報は、決済代行事業者であるStripe, Inc.によって安全に直接収集・処理（PCI-DSS準拠・256bit SSL暗号化）されます。当サービスのサーバーにクレジットカード番号が保持・保存されることは一切ありません。</p>
+
+                <div class="legal-section-title">3. 個人情報の利用目的</div>
+                <p>・有料プランの提供、認証、および契約管理のため<br>
+                ・お問い合わせへの回答および重要なお知らせの送信のため<br>
+                ・サービスの改善、不具合の調査および不正利用防止のため</p>
+
+                <div class="legal-section-title">4. 第三者提供の制限</div>
+                <p>法令に基づく要請がある場合を除き、お客様の事前同意なく個人情報を第三者に提供・開示することはありません。</p>
+
+                <div class="legal-section-title">5. お問い合わせ窓口</div>
+                <p>プライバシーポリシーに関するご質問やご相談は、下記窓口までご連絡ください。<br>
+                連絡先: <a href="mailto:support@shoruiflow.example.com" style="color: var(--color-action-accent); text-decoration: underline;">support@shoruiflow.example.com</a></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm modal-close-trigger" type="button">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
