@@ -45,15 +45,15 @@ def test_shorui_flow():
             errors.append(f"HTML element #{req_id} missing")
     print(f"  -> {len(required_ids)} 個の必須UIコンポーネント（フッター法務・特商法・規約モーダル含む）確認完了")
 
-    # 1.1 Stripe URL 埋め込み＆特商法必須記載検証
-    print("[1.1] Stripe審査用URL埋め込み & 特商法必須項目検証...")
-    stripe_buy_url = "https://buy.stripe.com/test_5kQfZg21R0Sd5jA3PSao801"
-    stripe_portal_url = "https://billing.stripe.com/p/login/test_28E14mbCr9oJh2i5Y0ao800"
+    # 1.1 Stripe URL 埋め込み＆特商法必須記載検証 (Live本番環境)
+    print("[1.1] Stripe本番URL埋め込み & 特商法必須項目検証...")
+    stripe_buy_url = "https://buy.stripe.com/14A4gyeRC7IleSOcEl3wQ02"
+    stripe_portal_url = "https://billing.stripe.com/p/login/5kQ00i38U3s54ea6fX3wQ00"
     
     if stripe_buy_url not in html_content or stripe_buy_url not in js_content:
-        errors.append("Stripe Checkout buy URL missing in HTML or JS")
+        errors.append("Live Stripe Checkout buy URL missing in HTML or JS")
     if stripe_portal_url not in html_content:
-        errors.append("Stripe Customer Portal URL missing in HTML")
+        errors.append("Live Stripe Customer Portal URL missing in HTML")
     
     # 特商法の必須記載文言検証
     tokusho_required_texts = [

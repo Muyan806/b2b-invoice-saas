@@ -826,7 +826,7 @@ function initModals() {
     const stripePayBtn = document.getElementById('btn-stripe-checkout');
     if (stripePayBtn) {
         stripePayBtn.addEventListener('click', () => {
-            const baseStripeUrl = stripePayBtn.dataset.url || 'https://buy.stripe.com/test_5kQfZg21R0Sd5jA3PSao801';
+            const baseStripeUrl = stripePayBtn.dataset.url || 'https://buy.stripe.com/14A4gyeRC7IleSOcEl3wQ02';
             const userId = getUserId();
             let finalCheckoutUrl;
             try {
